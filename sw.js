@@ -4,7 +4,7 @@
 //  - /assets/* (hashed JS, CSS, fonts, images: a new build = new names): cache first, kept forever
 //  - everything else (manifest, icons): stale-while-revalidate → instant, and refreshed for next time
 //  - API calls are never cached
-const CACHE = 'kiomio-v7'
+const CACHE = 'kiomio-v8'
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png']
 const INDEX = new URL('./index.html', self.location).pathname
 const ASSETS = new URL('./assets/', self.location).pathname
