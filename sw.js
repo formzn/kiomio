@@ -1,6 +1,8 @@
 // rioxzn service worker: app-shell cache, network-first for navigation, cache-first for assets.
-const CACHE = 'rioxzn-v5'
-const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png']
+// Paths are relative to this file, so it works at the site root (Netlify) and under /kiomio/ (GitHub Pages).
+const CACHE = 'rioxzn-v6'
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png']
+const INDEX = new URL('./index.html', self.location).pathname
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()))
@@ -18,7 +20,8 @@ self.addEventListener('fetch', (e) => {
   const req = e.request
   const url = new URL(req.url)
   if (req.method !== 'GET' || url.origin !== self.location.origin) return
-  // API calls (Tooken Club proxy) always go to the network — never cached, never served stale
+  // API calls (Tooken Club proxy: /api/tooken on Netlify; the Cloudflare Worker is cross-origin and
+  // skipped above) always go to the network — never cached, never served stale
   if (url.pathname.startsWith('/api/')) return
 
   if (req.mode === 'navigate') {
@@ -26,10 +29,10 @@ self.addEventListener('fetch', (e) => {
       fetch(req)
         .then((res) => {
           const copy = res.clone()
-          caches.open(CACHE).then((c) => c.put('/index.html', copy))
+          caches.open(CACHE).then((c) => c.put(INDEX, copy))
           return res
         })
-        .catch(() => caches.match('/index.html')),
+        .catch(() => caches.match(INDEX)),
     )
     return
   }
