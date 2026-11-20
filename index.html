@@ -5,22 +5,215 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="theme-color" content="#050507" />
     <meta name="color-scheme" content="dark" />
-    <meta name="description" content="rioxzn — твоё второе я. Он думает, помнит и говорит как ты." />
+    <meta name="description" content="kiomio — твоё второе я. Он думает, помнит и говорит как ты." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="rioxzn" />
+    <meta name="apple-mobile-web-app-title" content="kiomio" />
     <link rel="manifest" href="/kiomio/manifest.webmanifest" />
     <link rel="icon" type="image/png" href="/kiomio/icon-192.png" />
     <link rel="apple-touch-icon" href="/kiomio/apple-touch-icon.png" />
-    <title>rioxzn</title>
-    <script type="module" crossorigin src="/kiomio/assets/index-CqChteZH.js"></script>
+    <title>kiomio</title>
+    <!--
+      Splash: painted from this file alone (no JS bundle, no CSS file, no network), in the theme's own
+      colours read from localStorage «kiomio.boot» — so there is never a white or black flash.
+      CSS animations only (transform / opacity). src/boot/splash.ts brings in the 3D character and
+      the morph into the lock screen / chat; this inline part also works if the bundle is still loading.
+    -->
+    <style>
+      :root{--void:5 5 7;--fg:238 240 247;--eye:185 194 255;--halo-1:rgba(150,156,180,.16);--bg-tint:transparent}
+      html,body{margin:0;height:100%;background:rgb(var(--void));overflow:hidden}
+      #splash{position:fixed;inset:0;z-index:29;overflow:hidden;color:rgb(var(--fg));font-family:'Inter Variable',-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none;animation:sp-in .45s ease-out both,sp-out .45s 2.55s ease-in forwards}
+      #splash *{box-sizing:border-box}
+      /* the hard 3 s cap lives in CSS too (the line above): the compositor fades the splash even if the page is still busy loading */
+      .sp-bg{position:absolute;inset:0;background:radial-gradient(60% 42% at 50% 38%,var(--halo-1),transparent 70%),var(--bg-tint),rgb(var(--void))}
+      [data-daypart=night] .sp-bg::after{content:'';position:absolute;inset:0;background:rgba(0,0,8,.28)}
+      [data-daypart=morning] .sp-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(80% 50% at 80% 0%,rgba(255,186,120,.16),transparent 70%)}
+      .sp-stars,.sp-stars2{position:absolute;left:0;top:0;width:1px;height:1px;border-radius:50%;animation:sp-tw 3.2s ease-in-out infinite alternate}
+      .sp-stars2{animation-delay:-1.6s;opacity:0}
+      [data-daypart=day] .sp-stars2,[data-daypart=morning] .sp-stars2{display:none}
+      .sp-dust{position:absolute;width:5px;height:5px;border-radius:50%;background:rgb(var(--eye)/.5);filter:blur(1.5px);opacity:0;animation:sp-dust 6s linear infinite}
+      .sp-fx{position:absolute;top:-6vh;opacity:0;will-change:transform;pointer-events:none;line-height:1}
+      .sp-fx.snow{width:6px;height:6px;border-radius:50%;background:#fff;filter:blur(.6px);animation:sp-fall linear infinite}
+      .sp-fx.flakes{color:#eaf4ff;animation:sp-fall linear infinite}
+      .sp-fx.hearts{top:auto;bottom:-6vh;color:#ff8fb8;animation:sp-rise linear infinite}
+      .sp-fx.stars{width:3px;height:3px;border-radius:50%;background:#fff;top:auto;box-shadow:0 0 6px #fff;animation:sp-twinkle ease-in-out infinite}
+      .sp-sun{position:absolute;right:-30vw;top:-30vw;width:95vw;height:95vw;border-radius:50%;background:radial-gradient(closest-side,rgba(255,206,120,.35),rgba(255,160,70,.12) 55%,transparent);animation:sp-sun 4s ease-in-out infinite alternate}
+      .sp-glow{position:absolute;left:50%;top:calc(var(--sp-cy) * 1px);width:min(64vw,300px);aspect-ratio:1;margin:calc(min(64vw,300px) / -2) 0 0 calc(min(64vw,300px) / -2);border-radius:50%;background:radial-gradient(closest-side,rgb(var(--eye)/.34),rgb(var(--eye)/.1) 60%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.12);opacity:0;animation:sp-glow-in .6s .25s ease-out forwards,sp-breathe 4s .85s ease-in-out infinite}
+      .sp-glow::after{content:'';position:absolute;inset:16%;border-radius:50%;border:1px solid rgb(var(--eye)/.18);background:linear-gradient(160deg,rgba(255,255,255,.08),transparent 45%)}
+      .sp-slot{position:absolute;left:50%;top:calc(var(--sp-cy) * 1px);width:min(70vw,320px);height:min(38vh,330px);transform:translate(-50%,-50%)}
+      .sp-text{position:absolute;left:0;right:0;top:calc(var(--sp-ty) * 1px);text-align:center}
+      .sp-logo{margin:0;font-size:46px;font-weight:200;letter-spacing:.04em;line-height:1.1;text-shadow:0 0 22px rgb(var(--eye)/.55),0 0 2px rgb(var(--eye)/.6)}
+      .sp-logo span{display:inline-block;opacity:0;transform:translateY(14px);animation:sp-letter .5s cubic-bezier(.2,.9,.3,1.25) forwards}
+      .sp-tag{margin:6px 0 0;font-size:15px;font-weight:300;letter-spacing:.02em;opacity:0;color:rgb(var(--fg)/.72);animation:sp-up .6s 1.05s ease-out forwards}
+      .sp-load{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 15vh);width:min(56vw,220px);transform:translateX(-50%);text-align:center;opacity:0;animation:sp-up .5s .5s ease-out forwards}
+      .sp-bar{position:relative;height:4px;border-radius:4px;overflow:hidden;background:rgb(var(--fg)/.08);box-shadow:inset 0 0 0 1px rgb(var(--fg)/.09)}
+      .sp-bar i{position:absolute;inset:0;border-radius:4px;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,rgb(var(--eye)/.55),rgb(var(--eye)));box-shadow:0 0 10px rgb(var(--eye)/.7);animation:sp-fill 2.3s .35s cubic-bezier(.25,.6,.3,1) forwards}
+      .sp-bar b{position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-120%);animation:sp-shim 1.1s .6s ease-in-out infinite}
+      .sp-status{margin-top:12px;font-size:12.5px;font-weight:300;letter-spacing:.03em;color:rgb(var(--fg)/.55);height:18px;white-space:nowrap}
+      .sp-status span{display:inline-block;transition:opacity .18s}
+      .sp-dots{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+      .sp-dots i{width:4px;height:4px;border-radius:50%;background:rgb(var(--eye)/.85);animation:sp-dot 1s ease-in-out infinite}
+      .sp-dots i:nth-child(2){animation-delay:.15s}.sp-dots i:nth-child(3){animation-delay:.3s}
+      .sp-skip{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 18px);padding:9px 16px;border-radius:999px;border:1px solid rgb(var(--fg)/.14);background:rgb(var(--fg)/.07);backdrop-filter:blur(14px);color:rgb(var(--fg)/.7);font:inherit;font-size:13px;opacity:0;animation:sp-up .4s .6s ease-out forwards;cursor:pointer}
+      #splash.sp-out{animation:sp-out .45s cubic-bezier(.3,.7,.3,1) forwards;pointer-events:none}
+      #splash.sp-out .sp-text{animation:sp-logo-out .45s cubic-bezier(.34,1.4,.5,1) forwards}
+      #splash.sp-out .sp-load,#splash.sp-out .sp-skip{animation:sp-out .2s ease-out forwards}
+      #splash.sp-fast{animation:sp-out .2s ease-out forwards;pointer-events:none}
+      #splash.sp-rmout{animation:sp-out .6s ease forwards;pointer-events:none}
+      [data-rm] #splash,[data-rm] #splash *,[data-rm] #splash *::after{animation:none!important;transition:none!important}
+      html[data-rm] #splash{animation:sp-out .6s 2.35s ease forwards!important}
+      [data-rm] .sp-logo span,[data-rm] .sp-tag,[data-rm] .sp-load,[data-rm] .sp-skip,[data-rm] .sp-glow{opacity:1;transform:none}
+      [data-rm] .sp-load{transform:translateX(-50%)}
+      [data-rm] .sp-bar i{transform:scaleX(.6)}
+      [data-rm] .sp-fx,[data-rm] .sp-dust,[data-rm] .sp-bar b{display:none}
+      [data-rm] #splash.sp-rmout,[data-rm] #splash.sp-fast{animation:sp-out .6s ease forwards!important}
+      @keyframes sp-in{from{opacity:0}to{opacity:1}}
+      @keyframes sp-out{to{opacity:0}}
+      @keyframes sp-up{from{opacity:0;transform:translate(var(--sp-x,0),8px)}to{opacity:1;transform:translate(var(--sp-x,0),0)}}
+      .sp-load{--sp-x:-50%}
+      @keyframes sp-letter{to{opacity:1;transform:none}}
+      @keyframes sp-logo-out{to{opacity:0;transform:translateY(-28px) scale(.82)}}
+      @keyframes sp-tw{from{opacity:.25}to{opacity:1}}
+      @keyframes sp-dust{0%{opacity:0;transform:translate3d(0,0,0)}20%{opacity:.8}100%{opacity:0;transform:translate3d(var(--dx),-22vh,0)}}
+      @keyframes sp-fall{0%{opacity:0;transform:translate3d(0,0,0)}10%{opacity:.9}100%{opacity:.9;transform:translate3d(var(--dx),112vh,0) rotate(220deg)}}
+      @keyframes sp-rise{0%{opacity:0;transform:translate3d(0,0,0) scale(.7)}15%{opacity:.85}100%{opacity:0;transform:translate3d(var(--dx),-80vh,0) scale(1.1)}}
+      @keyframes sp-twinkle{0%,100%{opacity:.1;transform:scale(.6)}50%{opacity:1;transform:scale(1.4)}}
+      @keyframes sp-sun{from{opacity:.75;transform:scale(1)}to{opacity:1;transform:scale(1.06)}}
+      @keyframes sp-glow-in{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+      @keyframes sp-breathe{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.08);opacity:1}}
+      @keyframes sp-fill{0%{transform:scaleX(0)}100%{transform:scaleX(.94)}}
+      @keyframes sp-shim{to{transform:translateX(320%)}}
+      @keyframes sp-dot{0%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-4px);opacity:1}}
+    </style>
+    <script type="module" crossorigin src="/kiomio/assets/index-CZkPMMeO.js"></script>
     <link rel="modulepreload" crossorigin href="/kiomio/assets/motion-DzuF0SEY.js">
-    <link rel="modulepreload" crossorigin href="/kiomio/assets/three-C92VMTIO.js">
-    <link rel="modulepreload" crossorigin href="/kiomio/assets/r3f-Cy60Ajpu.js">
-    <link rel="stylesheet" crossorigin href="/kiomio/assets/index-2D4REyvT.css">
+    <link rel="preload" as="style" crossorigin href="/kiomio/assets/index-BznQkzkN.css" data-app-css onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="/kiomio/assets/index-BznQkzkN.css"></noscript>
   </head>
   <body>
+    <div id="splash" data-testid="splash" aria-label="kiomio загружается">
+      <div class="sp-bg"></div>
+      <div class="sp-glow"></div>
+      <div class="sp-slot" id="sp-slot"></div>
+      <div class="sp-text">
+        <h1 class="sp-logo" aria-label="kiomio"><span>k</span><span>i</span><span>o</span><span>m</span><span>i</span><span>o</span></h1>
+        <p class="sp-tag">твоё второе я</p>
+      </div>
+      <div class="sp-load" role="progressbar" aria-label="Загрузка">
+        <div class="sp-bar"><i></i><b></b></div>
+        <div class="sp-status" aria-live="polite"><span id="sp-status">просыпаюсь...</span><span class="sp-dots"><i></i><i></i><i></i></span></div>
+      </div>
+      <button class="sp-skip" type="button" data-testid="splash-skip">Пропустить</button>
+    </div>
+    <script>
+      ;(function () {
+        var d = document.documentElement
+        var el = document.getElementById('splash')
+        var now = function () { return performance.now() }
+        var S = (window.__splash = { t0: now(), phase: 'intro', ready: false, fx: '', rm: false, fast: false, ls: [] })
+        var boot = null
+        try { boot = JSON.parse(localStorage.getItem('kiomio.boot') || 'null') } catch (e) {}
+        if (boot && boot.vars) for (var k in boot.vars) d.style.setProperty(k, boot.vars[k])
+        if (boot) {
+          d.style.colorScheme = boot.light ? 'light' : 'dark'
+          if (boot.chrome) document.querySelector('meta[name="theme-color"]').setAttribute('content', boot.chrome)
+          S.fx = boot.fx || ''
+        }
+        // tests (and the dev-only ?lab page) start straight in the app
+        if (window.__KIOMIO_NO_SPLASH || /[?&]lab\b/.test(location.search)) {
+          el.parentNode.removeChild(el)
+          S.phase = 'done'
+          return
+        }
+        S.rm = !!(boot && boot.rm) || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)
+        if (S.rm) d.setAttribute('data-rm', '')
+        var h = new Date().getHours()
+        d.setAttribute('data-daypart', h >= 22 || h < 5 ? 'night' : h < 10 ? 'morning' : 'day')
+        var W = innerWidth, H = innerHeight
+        var cy = Math.round(H * 0.36)
+        el.style.setProperty('--sp-cy', cy)
+        el.style.setProperty('--sp-ty', Math.round(cy + Math.min(H * 0.19, 165) + 22))
+        // stars: two box-shadow layers (one element each); dust: a few drifting motes
+        var night = d.getAttribute('data-daypart') === 'night'
+        function stars(n) {
+          var s = []
+          for (var i = 0; i < n; i++) s.push(Math.round(Math.random() * W) + 'px ' + Math.round(Math.random() * H * 0.85) + 'px 0 ' + (Math.random() < 0.2 ? '1px' : '0') + ' rgba(255,255,255,' + (0.35 + Math.random() * 0.5).toFixed(2) + ')')
+          return s.join(',')
+        }
+        function add(cls, css, html) {
+          var e = document.createElement('div')
+          e.className = cls
+          if (css) e.setAttribute('style', css)
+          if (html) e.textContent = html
+          el.insertBefore(e, el.children[1])
+          return e
+        }
+        add('sp-stars', 'box-shadow:' + stars(night ? 70 : 38))
+        add('sp-stars2', 'box-shadow:' + stars(night ? 60 : 24))
+        for (var i = 0; i < 8; i++) add('sp-dust', 'left:' + (10 + Math.random() * 80) + '%;top:' + (35 + Math.random() * 55) + '%;--dx:' + Math.round(Math.random() * 60 - 30) + 'px;animation-delay:' + (-Math.random() * 6).toFixed(2) + 's')
+        var fx = S.fx
+        if (fx === 'sun') add('sp-sun')
+        else if (fx) {
+          var n = fx === 'stars' ? 26 : fx === 'snow' ? 26 : 14
+          for (var j = 0; j < n; j++) {
+            var dur = fx === 'stars' ? 1.4 + Math.random() * 1.6 : 3.5 + Math.random() * 3.5
+            var css = 'left:' + (Math.random() * 100).toFixed(1) + '%;--dx:' + Math.round(Math.random() * 80 - 40) + 'px;animation-duration:' + dur.toFixed(2) + 's;animation-delay:' + (-Math.random() * dur).toFixed(2) + 's'
+            if (fx === 'stars') css += ';top:' + (Math.random() * 80).toFixed(1) + '%'
+            if (fx === 'flakes' || fx === 'hearts') css += ';font-size:' + Math.round(12 + Math.random() * 12) + 'px'
+            add('sp-fx ' + fx, css, fx === 'flakes' ? '\u2744' : fx === 'hearts' ? '\u2665' : '')
+          }
+        }
+        // status line: one phrase every ~0.55 s
+        var LINES = ['просыпаюсь...', 'вспоминаю тебя...', 'готовлю комнату...', 'почти готово...']
+        var st = document.getElementById('sp-status'), li = 0
+        var iv = setInterval(function () {
+          if (li >= LINES.length - 1) return clearInterval(iv)
+          st.style.opacity = '0'
+          setTimeout(function () { st.textContent = LINES[++li]; st.style.opacity = '1' }, 180)
+        }, 560)
+        // timing: shown ≥ MIN while the app gets ready, ends at CAP no matter what; with the
+        // morph (450 ms) or the reduced-motion fade (600 ms) it is always gone within 3 s
+        var MIN = S.rm ? 700 : 1900, CAP = S.rm ? 2350 : 2550
+        function emit() { for (var i = 0; i < S.ls.length; i++) try { S.ls[i](S) } catch (e) {} }
+        function end(fast) {
+          if (S.phase !== 'intro') return
+          S.phase = 'morph'
+          S.fast = !!fast
+          clearInterval(iv)
+          var bar = el.querySelector('.sp-bar i')
+          bar.style.animation = 'none'
+          bar.style.transition = 'transform .15s'
+          bar.style.transform = 'scaleX(1)'
+          el.className = fast ? 'sp-fast' : S.rm ? 'sp-rmout' : 'sp-out'
+          emit()
+          setTimeout(function () {
+            if (el.parentNode) el.parentNode.removeChild(el)
+            S.phase = 'done'
+            emit()
+          }, S.rm ? 600 : fast ? 200 : 450)
+        }
+        function check() { if (S.ready && now() - S.t0 >= MIN && !window.__KIOMIO_SPLASH_HOLD) end(false) }
+        S.on = function (f) { S.ls.push(f) }
+        S.setReady = function () { S.ready = true; check() }
+        S.skip = function () { end(true) }
+        S.finish = function () { end(false) }
+        // (e2e only: __KIOMIO_SPLASH_HOLD keeps it up so the frames can be inspected)
+        if (!window.__KIOMIO_SPLASH_HOLD) {
+          setTimeout(check, MIN)
+          setTimeout(function () { end(false) }, CAP)
+        } else el.style.animation = 'none'
+        // tap anywhere / «Пропустить»: a real tap, not a finger sliding around (his eyes follow that)
+        var down = null
+        el.addEventListener('pointerdown', function (e) { down = { x: e.clientX, y: e.clientY, t: now() } })
+        el.addEventListener('pointerup', function (e) {
+          if (!down) return
+          var tap = Math.abs(e.clientX - down.x) < 12 && Math.abs(e.clientY - down.y) < 12 && now() - down.t < 600
+          down = null
+          if (tap) end(true)
+        })
+        el.querySelector('.sp-skip').addEventListener('click', function () { end(true) })
+      })()
+    </script>
     <div id="root"></div>
   </body>
 </html>
